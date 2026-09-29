@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=HyprMod
+Comment=Visual configuration editor for Hyprland
+Exec=hyprmod
+Icon=hyprmod
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;System;
+StartupNotify=true
+StartupWMClass=HyprMod

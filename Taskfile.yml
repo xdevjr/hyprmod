@@ -1,0 +1,33 @@
+version: '3'
+
+vars:
+  APP_NAME: 'hyprmod'
+  BIN_DIR: 'bin'
+  # Linux Wails v3 defaults to GTK4/WebKitGTK 6. HyprMod pins the v3 beta that
+  # still supports the opt-in `gtk3` backend, which builds against webkit2gtk-4.1.
+  DEFAULT_TAGS: 'gtk3'
+  EXTRA_TAGS: '{{.EXTRA_TAGS | default .DEFAULT_TAGS}}'
+
+tasks:
+  build:
+    summary: Build the frontend and the HyprMod desktop binary
+    cmds:
+      - cd frontend && npm ci
+      - cd frontend && npm run build
+      - mkdir -p {{.BIN_DIR}}
+      - go build -tags {{.EXTRA_TAGS}} -o {{.BIN_DIR}}/{{.APP_NAME}} .
+
+  bindings:
+    summary: Regenerate the TypeScript bindings from the Go services
+    cmds:
+      - wails3 generate bindings -ts -i -f '-tags {{.EXTRA_TAGS}}' -d frontend/bindings ./...
+
+  test:
+    summary: Run the Go test suite
+    cmds:
+      - go test ./...
+
+  default:
+    summary: Build the application
+    cmds:
+      - task: build
