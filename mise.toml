@@ -1,0 +1,44 @@
+# Tool versions and task runner for HyprMod.
+#
+# Linux builds use the `gtk3` tag: it is the Wails v3 backend that still builds
+# against webkit2gtk-4.1, which is what Arch-based distributions ship.
+#
+# Taskfile.yml exists separately and only so that `wails3 build` keeps working;
+# mise is the canonical task runner.
+
+[tools]
+go = "1.26.8"
+node = "24"
+
+[tasks.dev]
+description = "Run the Vue dev server on 127.0.0.1:5173"
+run = "cd frontend && npm run dev"
+
+[tasks.frontend]
+description = "Install frontend dependencies and build the Vue bundle"
+run = ["npm ci", "npm run build"]
+dir = "frontend"
+
+[tasks.bindings]
+description = "Regenerate the TypeScript bindings from the Go services"
+run = "wails3 generate bindings -ts -i -f '-tags gtk3' -d frontend/bindings ./..."
+
+[tasks.build]
+description = "Build the frontend and the HyprMod desktop binary"
+run = [
+    "mise run frontend",
+    "mkdir -p bin",
+    "go build -tags gtk3 -o bin/hyprmod .",
+]
+
+[tasks.test]
+description = "Run the Go test suite for the core packages"
+run = "go test ./..."
+
+[tasks.test-gui]
+description = "Run the Go test suite including the Wails main package"
+run = "go test -tags gtk3 ./..."
+
+[tasks.vet]
+description = "Run go vet over every package"
+run = "go vet ./..."

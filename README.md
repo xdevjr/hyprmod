@@ -94,32 +94,34 @@ interface nunca precisa adivinhar um controle.
 
 ## Compilando
 
-```sh
-make build        # frontend + binário em bin/hyprmod
-```
-
-ou, usando o runner de tarefas do Wails:
+As tarefas e as versões de ferramentas ficam em `mise.toml`, então nenhum comando
+depende de ter Go ou Node instalados globalmente:
 
 ```sh
-wails3 build
+mise run build      # frontend + binário em bin/hyprmod
 ```
 
 Outros alvos:
 
 ```sh
-make frontend     # só o bundle Vue (npm ci && vue-tsc && vite build)
-make bindings     # regenera os bindings TypeScript a partir dos serviços Go
-make test         # suíte de testes do core
-make test-gui     # suíte incluindo o pacote main com a tag gtk3
+mise run frontend   # só o bundle Vue (npm ci && vue-tsc && vite build)
+mise run bindings   # regenera os bindings TypeScript a partir dos serviços Go
+mise run test       # suíte de testes do core
+mise run test-gui   # suíte incluindo o pacote main com a tag gtk3
+mise run vet        # análise estática
 ```
 
-Depois de `make bindings`, o `main.go` é compilado com a tag `gtk3`.
+Depois de `mise run bindings`, o `main.go` é compilado com a tag `gtk3`.
+
+Existe também um `Taskfile.yml`, mantido apenas para que o comando `wails3 build`
+continue funcionando — ele delega a execução para o runner do Wails. O mise é o
+runner canônico do projeto.
 
 ## Desenvolvimento
 
 ```sh
-make frontend     # build de produção
-cd frontend && npm run dev   # servidor Vite em 127.0.0.1:5173
+mise run frontend        # build de produção
+mise run dev             # servidor Vite em 127.0.0.1:5173
 ```
 
 ### Testes
@@ -157,12 +159,12 @@ Nenhum pacote interno depende do Wails, o que mantém o core testável e rápido
 ## Distribuição
 
 O alvo é Arch e derivados, onde o `webkit2gtk-4.1` já está disponível. O pacote é
-compilado com `make build` e distribuído como um `tar.gz` com o binário, o
+compilado com `mise run build` e distribuído como um `tar.gz` com o binário, o
 `.desktop` e o ícone de `packaging/`:
 
 ```sh
-make build
-tar -czf hyprmod-linux-x86_64.tar.gz -C bin hyprmod -C ../packaging .
+mise run build
+tar -czf hyprmod-linux-x86_64.tar.gz -C bin hyprmod -C packaging .
 ```
 
 Instalação manual: extraia o binário em `PATH` e copie o `.desktop` e o ícone para
@@ -170,7 +172,7 @@ Instalação manual: extraia o binário em `PATH` e copie o `.desktop` e o ícon
 
 > Não há automação de CI/release neste repositório. Publicar arquivos de workflow no
 > GitHub exige uma credencial com o escopo `workflow`, que não estava disponível; os
-> testes e o build são executados localmente pelos alvos do `Makefile`.
+> testes e o build são executados localmente pelas tarefas do `mise.toml`.
 
 ## Limitações conhecidas
 
